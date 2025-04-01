@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>С Днём Рождения, Арслан!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: #1a0000;
+            color: #ffcccc;
+        }
+        
+        .blood-text {
+            text-shadow: 2px 2px 4px #990000;
+        }
+        
+        .glow-btn {
+            transition: all 0.3s;
+        }
+        
+        .glow-btn:hover {
+            box-shadow: 0 0 15px #ff3333;
+            transform: translateY(-2px);
+        }
+        
+        .blood-drip {
+            position: relative;
+        }
+        
+        .blood-drip::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 15px;
+            background: radial-gradient(ellipse at center, rgba(153,0,0,0.8) 0%, rgba(153,0,0,0) 70%);
+        }
+        
+        .game-container {
+            background: linear-gradient(135deg, #330000 0%, #1a0000 100%);
+            border: 2px solid #660000;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        #dino-game {
+            background-color: #f7f7f7;
+            border: 3px solid #770000;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .gift-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gift-content {
+            background: linear-gradient(135deg, #330000 0%, #1a0000 100%);
+            padding: 30px;
+            border-radius: 10px;
+            border: 3px solid #990000;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .gift-code {
+            font-family: monospace;
+            font-size: 24px;
+            background-color: #110000;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px dashed #ff3333;
+            display: inline-block;
+            letter-spacing: 3px;
+        }
+
+        /* Стили для улучшенной игры Dino */
+        #dino-game {
+            background-color: #f7f7f7;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ground {
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background-color: #222;
+            bottom: 0;
+            left: 0;
+        }
+
+        .cloud {
+            position: absolute;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+        }
+
+        .cactus {
+            position: absolute;
+            background-color: #555;
+            bottom: 0;
+        }
+
+        .dino {
+            position: absolute;
+            width: 44px;
+            height: 47px;
+            background-color: #666;
+            bottom: 0;
+            left: 30px;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 30px;
+            font-weight: bold;
+            color: #990000;
+            display: none;
+        }
+
+        .score {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            font-family: monospace;
+            color: #666;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Шапка -->
+    <header class="bg-black py-4 border-b-4 border-red-900">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl md:text-6xl font-bold text-center blood-text text-red-500">
+                <span class="blood-drip">С ДНЁМ РОЖДЕНИЯ, АРСЛАН!</span>
+            </h1>
+        </div>
+    </header>
+
+    <!-- Основное содержимое -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <!-- Приветствие -->
+        <section class="mb-12 text-center">
+            <h2 class="text-2xl md:text-4xl font-bold mb-4 text-red-400 blood-text">
+                <i class="fas fa-birthday-cake mr-2"></i>Скоро тебе исполнится 12 лет!
+            </h2>
+            <p class="text-lg md:text-xl mb-6 max-w-3xl mx-auto">
+                Дорогой Арслан, этот сайт я создал специально для тебя! Здесь ты найдёшь поздравления, игры и даже викторину обо мне. Желаю тебе всего самого лучшего в твой день рождения!
+            </p>
+            <div class="p-4 game-container rounded-lg max-w-3xl mx-auto">
+                <h3 class="text-xl font-bold mb-2 text-red-300">
+                    <i class="fas fa-gift mr-2"></i>До твоего дня рождения осталось:
+                </h3>
+                <div id="countdown" class="text-2xl md:text-4xl font-bold text-red-400 flex justify-center space-x-4">
+                    <div class="text-center">
+                        <div id="days" class="text-4xl md:text-6xl">00</div>
+                        <div class="text-sm">дней</div>
+                    </div>
+                    <div class="text-center">
+                        <div id="hours" class="text-4xl md:text-6xl">00</div>
+                        <div class="text-sm">часов</div>
+                    </div>
+                    <div class="text-center">
+                        <div id="minutes" class="text-4xl md:text-6xl">00</div>
+                        <div class="text-sm">минут</div>
+                    </div>
+                    <div class="text-center">
+                        <div id="seconds" class="text-4xl md:text-6xl">00</div>
+                        <div class="text-sm">секунд</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Игра -->
+        <section class="mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center text-red-400 blood-text">
+                <i class="fas fa-gamepad mr-2"></i>Игра специально для тебя
+            </h2>
+            <div class="game-container rounded-lg p-4">
+                <h3 class="text-xl font-bold mb-4 text-red-300 text-center">Google Chrome Dino (улучшенная версия)</h3>
+                <p class="mb-4 text-center">Не забудь нажать на игровое поле перед началом игры! Нажимай пробел или стрелку вверх, чтобы прыгать и избегай кактусов.</p>
+                <div class="flex justify-center mb-4">
+                    <button id="start-game" class="bg-red-800 hover:bg-red-700 glow-btn text-white font-bold py-2 px-6 rounded-full transition-all">
+                        Начать игру
+                    </button>
+                </div>
+                <div class="flex justify-center">
+                    <div id="dino-game" style="width: 600px; height: 200px;">
+                        <div class="ground"></div>
+                        <div class="score">0</div>
+                        <div class="game-over">GAME OVER</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Викторина -->
+        <section class="mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center text-red-400 blood-text">
+                <i class="fas fa-question-circle mr-2"></i>Викторина о Серафиме
+            </h2>
+            <div class="game-container rounded-lg p-6 max-w-3xl mx-auto">
+                <div id="quiz-container">
+                    <h3 class="text-xl font-bold mb-4 text-red-300 text-center">
+                        Проверь, насколько хорошо ты знаешь своего друга Серафима!
+                    </h3>
+                    <p class="mb-6 text-center">
+                        Ответь на 5 вопросов и узнай свой результат!
+                    </p>
+                    <div id="quiz-questions" class="space-y-6">
+                        <!-- Вопросы будут добавлены через JavaScript -->
+                    </div>
+                    <div class="mt-8 text-center">
+                        <button id="submit-quiz" class="bg-red-800 hover:bg-red-700 glow-btn text-white font-bold py-3 px-8 rounded-full transition-all">
+                            Проверить ответы
+                        </button>
+                    </div>
+                </div>
+                <div id="quiz-result" class="hidden text-center">
+                    <h3 class="text-2xl font-bold mb-4 text-red-300" id="result-title">Результат</h3>
+                    <div class="text-4xl font-bold mb-6" id="result-score">0/5</div>
+                    <p class="mb-6" id="result-message"></p>
+                    <button id="retry-quiz" class="bg-red-800 hover:bg-red-700 glow-btn text-white font-bold py-3 px-8 rounded-full transition-all">
+                        Попробовать снова
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Пожелания -->
+        <section class="text-center">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-red-400 blood-text">
+                <i class="fas fa-heart mr-2"></i>Мои пожелания тебе
+            </h2>
+            <div class="max-w-3xl mx-auto">
+                <div class="p-6 game-container rounded-lg mb-6">
+                    <p class="text-lg italic mb-4">
+                        "Дорогой Арслан, желаю тебе в твой день рождения много радости, весёлых моментов, успехов в учёбе и крутых друзей!"
+                    </p>
+                    <p class="text-lg">
+                        Пусть этот год будет для тебя особенным! Дружбу, что у нас есть, я очень ценю. С Днём Рождения, лучший друг!
+                    </p>
+                </div>
+                <div class="p-4">
+                    <p class="pulse text-sm md:text-base">
+                        <i class="fas fa-heartbeat text-red-500 mr-1"></i> С любовью, твой друг Серафим из Кемерово <i class="fas fa-heartbeat text-red-500 ml-1"></i>
+                    </p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Кнопка подарка -->
+        <section class="text-center mt-8">
+            <button id="gift-btn" class="bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 glow-btn text-white font-bold py-4 px-10 rounded-full text-xl transition-all shadow-lg">
+                <i class="fas fa-gift mr-2"></i>Получить подарок
+            </button>
+        </section>
+    </main>
+
+    <!-- Подвал -->
+    <footer class="bg-black py-6 border-t-4 border-red-900">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-2 text-red-400">
+                Сайт создан специально для Арслана © 2023
+            </p>
+            <div class="flex justify-center space-x-4 text-lg">
+                <a href="#" class="text-red-500 hover:text-red-300 transition-colors">
+                    <i class="fab fa-vk"></i>
+                </a>
+                <a href="#" class="text-red-500 hover:text-red-300 transition-colors">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="text-red-500 hover:text-red-300 transition-colors">
+                    <i class="fab fa-telegram"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Модальное окно подарка -->
+    <div id="gift-modal" class="gift-modal">
+        <div class="gift-content">
+            <h3 class="text-2xl font-bold mb-4 text-red-300">Твой эксклюзивный подарок!</h3>
+            <p class="mb-4">Вот специальный код для Pro-версии CHALDGPT:</p>
+            <div class="gift-code" id="gift-code">CHALDGPT-ARS29-8X5J3</div>
+            <p class="text-sm text-red-300 mb-4">Запомни или сохрани этот код, он больше не повторится!</p>
+            <button id="close-gift" class="bg-red-700 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full">
+                Закрыть
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Таймер до дня рождения
+        function updateCountdown() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            let birthday = new Date(currentYear, 3, 29); // 29 апреля (месяцы 0-11)
+            
+            if (birthday < now) {
+                birthday.setFullYear(currentYear + 1);
+            }
+            
+            const diff = birthday - now;
+            
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+        
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Игра Dino (улучшенная версия)
+        document.addEventListener('DOMContentLoaded', function() {
+            const gameContainer = document.getElementById('dino-game');
+            const startBtn = document.getElementById('start-game');
+            
+            // Создаем элементы игры
+            const dino = document.createElement('div');
+            dino.className = 'dino';
+            gameContainer.appendChild(dino);
+            
+            const ground = document.querySelector('.ground');
+            const scoreElement = document.querySelector('.score');
+            const gameOverElement = document.querySelector('.game-over');
+            
+            let isJumping = false;
+            let isGameOver = false;
+            let score = 0;
+            let speed = 5;
+            let gameInterval;
+            let cactusInterval;
+            
+            function startGame() {
+                if (gameInterval) return;
+                
+                // Очищаем предыдущие кактусы и облака
+                document.querySelectorAll('.cactus, .cloud').forEach(el => el.remove());
+                
+                // Сбрасываем параметры игры
+                isGameOver = false;
+                isJumping = false;
+                score = 0;
+                speed = 5;
+                dino.style.bottom = '0';
+                gameOverElement.style.display = 'none';
+                
+                // Начинаем игру
+                gameInterval = setInterval(updateGame, 20);
+                cactusInterval = setInterval(createCactus, 2000);
+                createCloud();
+                
+                startBtn.textContent = 'Игра идёт...';
+                startBtn.disabled = true;
+                
+                // Фокус на игровом поле
+                gameContainer.focus();
+            }
+            
+            function updateGame() {
+                if (isGameOver) return;
+                
+                // Обновляем счет
+                score++;
+                scoreElement.textContent = Math.floor(score / 5);
+                
+                // Увеличиваем скорость каждые 500 очков
+                if (score % 500 === 0) {
+                    speed += 0.5;
+                }
+                
+                // Проверяем столкновения
+                const dinoRect = dino.getBoundingClientRect();
+                const cactuses = document.querySelectorAll('.cactus');
+                
+                cactuses.forEach(cactus => {
+                    const cactusRect = cactus.getBoundingClientRect();
+                    
+                    if (
+                        dinoRect.right > cactusRect.left &&
+                        dinoRect.left < cactusRect.right &&
+                        dinoRect.bottom > cactusRect.top
+                    ) {
+                        endGame();
+                    }
+                });
+            }
+            
+            function jump() {
+                if (isJumping || isGameOver) return;
+                
+                isJumping = true;
+                let position = 0;
+                let jumpHeight = 100;
+                let jumpSpeed = 4;
+                
+                const jumpInterval = setInterval(() => {
+                    // Поднимаем динозавра
+                    if (position < jumpHeight) {
+                        position += jumpSpeed;
+                        dino.style.bottom = position + 'px';
+                    } 
+                    // Опускаем динозавра
+                    else if (position >= 0) {
+                        position -= jumpSpeed;
+                        dino.style.bottom = position + 'px';
+                    } 
+                    // Завершаем прыжок
+                    else {
+                        clearInterval(jumpInterval);
+                        isJumping = false;
+                        dino.style.bottom = '0';
+                    }
+                }, 20);
+            }
+            
+            function createCactus() {
+                if (isGameOver) return;
+                
+                const cactus = document.createElement('div');
+                cactus.className = 'cactus';
+                
+                // Случайная высота кактуса
+                const heights = [30, 45, 60];
+                const height = heights[Math.floor(Math.random() * heights.length)];
+                const width = height / 1.5;
+                
+                cactus.style.height = height + 'px';
+                cactus.style.width = width + 'px';
+                cactus.style.right = '0';
+                
+                gameContainer.appendChild(cactus);
+                
+                let position = 600;
+                const moveInterval = setInterval(() => {
+                    if (position < -width || isGameOver) {
+                        clearInterval(moveInterval);
+                        cactus.remove();
+                    } else {
+                        position -= speed;
+                        cactus.style.right = (600 - position) + 'px';
+                    }
+                }, 20);
+            }
+            
+            function createCloud() {
+                if (isGameOver) return;
+                
+                const cloud = document.createElement('div');
+                cloud.className = 'cloud';
+                
+                const size = Math.random() * 30 + 20;
+                cloud.style.width = size + 'px';
+                cloud.style.height = size / 2 + 'px';
+                cloud.style.top = Math.random() * 50 + 20 + 'px';
+                cloud.style.right = '0';
+                
+                gameContainer.appendChild(cloud);
+                
+                let position = 600;
+                const cloudSpeed = speed / 2;
+                const moveInterval = setInterval(() => {
+                    if (position < -size || isGameOver) {
+                        clearInterval(moveInterval);
+                        cloud.remove();
+                        
+                        // Создаем новое облако через случайный интервал
+                        if (!isGameOver) {
+                            setTimeout(createCloud, Math.random() * 3000 + 2000);
+                        }
+                    } else {
+                        position -= cloudSpeed;
+                        cloud.style.right = (600 - position) + 'px';
+                    }
+                }, 20);
+            }
+            
+            function endGame() {
+                isGameOver = true;
+                clearInterval(gameInterval);
+                clearInterval(cactusInterval);
+                gameOverElement.style.display = 'block';
+                
+                startBtn.textContent = 'Играть снова';
+                startBtn.disabled = false;
+            }
+            
+            startBtn.addEventListener('click', startGame);
+            
+            // Управление клавиатурой
+            gameContainer.addEventListener('keydown', (e) => {
+                if ((e.code === 'Space' || e.key === 'ArrowUp') && !isGameOver) {
+                    jump();
+                    e.preventDefault();
+                }
+            });
+            
+            // Управление кликом/тапом
+            gameContainer.addEventListener('click', () => {
+                if (!isGameOver) {
+                    jump();
+                } else {
+                    startGame();
+                }
+            });
+            
+            // Делаем игровое поле фокусируемым
+            gameContainer.setAttribute('tabindex', '0');
+            gameContainer.focus();
+
+            // Викторина
+            const quizQuestions = [
+                {
+                    question: "Сколько лет Серафиму?",
+                    options: ["10 лет", "11 лет", "12 лет", "13 лет"],
+                    correct: 2
+                },
+                {
+                    question: "Где живёт Серафим?",
+                    options: ["Москва", "Кемерово", "Санкт-Петербург", "Новосибирск"],
+                    correct: 1
+                },
+                {
+                    question: "Какое время года Серафим любит больше всего?",
+                    options: ["Зиму", "Весну", "Лето", "Осень"],
+                    correct: 2
+                },
+                {
+                    question: "Какой жанр игр нравится Серафиму?",
+                    options: ["Гонки", "Шутеры", "Стратегии", "Все варианты"],
+                    correct: 2 // Изменено на "Стратегии"
+                },
+                {
+                    question: "Кто лучший друг Серафима?",
+                    options: ["Иван", "Арслан", "Дмитрий", "Александр"],
+                    correct: 1
+                }
+            ];
+
+            const quizContainer = document.getElementById('quiz-questions');
+            const submitBtn = document.getElementById('submit-quiz');
+            const retryBtn = document.getElementById('retry-quiz');
+            const quizResult = document.getElementById('quiz-result');
+            const resultScore = document.getElementById('result-score');
+            const resultMessage = document.getElementById('result-message');
+            const resultTitle = document.getElementById('result-title');
+
+            // Заполнение вопросов
+            function loadQuiz() {
+                quizContainer.innerHTML = '';
+                quizQuestions.forEach((question, qIndex) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'p-4 bg-red-900 rounded-lg';
+                    
+                    const questionText = document.createElement('h4');
+                    questionText.className = 'text-lg font-bold mb-3 text-red-200';
+                    questionText.textContent = `${qIndex + 1}. ${question.question}`;
+                    
+                    questionDiv.appendChild(questionText);
+                    
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'space-y-3';
+                    
+                    question.options.forEach((option, oIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'flex items-center';
+                        
+                        const input = document.createElement('input');
+                        input.type = 'radio';
+                        input.name = `q${qIndex}`;
+                        input.id = `q${qIndex}o${oIndex}`;
+                        input.value = oIndex;
+                        input.className = 'mr-2 h-4 w-4 text-red-600 focus:ring-red-500';
+                        
+                        const label = document.createElement('label');
+                        label.htmlFor = `q${qIndex}o${oIndex}`;
+                        label.className = 'text-red-100';
+                        label.textContent = option;
+                        
+                        optionDiv.appendChild(input);
+                        optionDiv.appendChild(label);
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    
+                    questionDiv.appendChild(optionsDiv);
+                    quizContainer.appendChild(questionDiv);
+                });
+            }
+
+            // Проверка ответов
+            function checkAnswers() {
+                let score = 0;
+                
+                quizQuestions.forEach((question, qIndex) => {
+                    const selectedOption = document.querySelector(`input[name="q${qIndex}"]:checked`);
+                    
+                    if (selectedOption && parseInt(selectedOption.value) === question.correct) {
+                        score++;
+                    }
+                });
+                
+                return score;
+            }
+
+            // Показ результата
+            function showResult(score) {
+                resultScore.textContent = `${score}/${quizQuestions.length}`;
+                
+                if (score === quizQuestions.length) {
+                    resultTitle.textContent = "Идеально!";
+                    resultMessage.textContent = "Ты действительно хорошо знаешь Серафима! Вы отличные друзья!";
+                } else if (score >= quizQuestions.length * 0.7) {
+                    resultTitle.textContent = "Хороший результат!";
+                    resultMessage.textContent = "Ты хорошо знаешь Серафима, но есть куда стремиться!";
+                } else if (score >= quizQuestions.length * 0.4) {
+                    resultTitle.textContent = "Неплохо!";
+                    resultMessage.textContent = "Ты знаешь Серафима, но не всё. Узнай его лучше!";
+                } else {
+                    resultTitle.textContent = "Попробуй ещё!";
+                    resultMessage.textContent = "Похоже, тебе нужно получше узнать Серафима. Не переживай, у тебя всё получится!";
+                }
+                
+                document.getElementById('quiz-container').classList.add('hidden');
+                quizResult.classList.remove('hidden');
+            }
+
+            // Обработчики событий
+            submitBtn.addEventListener('click', () => {
+                const score = checkAnswers();
+                showResult(score);
+            });
+
+            retryBtn.addEventListener('click', () => {
+                document.getElementById('quiz-container').classList.remove('hidden');
+                quizResult.classList.add('hidden');
+                loadQuiz();
+            });
+
+            // Загрузка викторины при открытии страницы
+            loadQuiz();
+
+            // Подарок
+            const giftBtn = document.getElementById('gift-btn');
+            const giftModal = document.getElementById('gift-modal');
+            const closeGift = document.getElementById('close-gift');
+            const giftCode = document.getElementById('gift-code');
+
+            giftBtn.addEventListener('click', () => {
+                // Показываем модальное окно с кодом
+                giftModal.style.display = 'flex';
+                
+                // Можно добавить анимацию появления
+                setTimeout(() => {
+                    giftModal.style.opacity = '1';
+                }, 10);
+            });
+
+            closeGift.addEventListener('click', () => {
+                giftModal.style.display = 'none';
+            });
+
+            // Закрытие при клике вне модального окна
+            window.addEventListener('click', (e) => {
+                if (e.target === giftModal) {
+                    giftModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
